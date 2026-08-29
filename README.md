@@ -15,7 +15,7 @@ Automatic Weather Stations (AWS) feed real-time atmospheric data into forecastin
 
 ## 2. Our Solution — Architecture Overview
 
-SkyGuard AI is a 4-layer pipeline, going from raw sensor data to an explained, actionable alert.
+Avalon AI is a 4-layer pipeline, going from raw sensor data to an explained, actionable alert.
 
 ```
 1. Data Acquisition  →  2. Feature Engineering  →  3. Hybrid Anomaly Detection  →  4. Reasoning & Explainability  →  5. Decision & Alerts  →  6. Human/System Action  →  7. Feedback Loop
