@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Avalon SIH - Login</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+        body {
+            margin: 0;
+            min-height: 100vh;
+
+            background: url("{{ url_for('static', filename='images/background.png') }}")
+                        no-repeat center center fixed;
+
+            background-size: cover;
+
+            background-color: #2C3531;
+
+            color: #D1E8E2;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            box-shadow: inset 0 0 0 2000px rgba(10, 25, 25, 0.55);
+        }
+
+        .login-box {
+            width: 400px;
+            padding: 40px;
+
+            background: rgba(10, 30, 30, 0.85);
+
+            border: 1px solid rgba(209, 232, 226, 0.3);
+
+            border-radius: 15px;
+
+            box-shadow: 0 0 40px rgba(17, 100, 102, 0.4);
+
+            backdrop-filter: blur(10px);
+        }
+
+        .login-title {
+            font-size: 32px;
+            font-weight: bold;
+            text-align: center;
+
+            margin-bottom: 30px;
+        }
+
+        .form-control {
+            background: rgba(255, 255, 255, 0.08);
+
+            border: 1px solid rgba(209, 232, 226, 0.3);
+
+            color: white;
+
+            padding: 12px;
+        }
+
+        .form-control:focus {
+            background: rgba(255, 255, 255, 0.12);
+
+            color: white;
+
+            border-color: #116466;
+
+            box-shadow: 0 0 10px rgba(17, 100, 102, 0.5);
+        }
+
+        .form-control::placeholder {
+            color: rgba(209, 232, 226, 0.6);
+        }
+
+        .btn-custom {
+            width: 100%;
+
+            background-color: #116466;
+
+            color: #D1E8E2;
+
+            border: none;
+
+            padding: 12px;
+
+            font-weight: bold;
+
+            letter-spacing: 1px;
+
+            transition: 0.3s;
+        }
+
+        .btn-custom:hover {
+            background-color: #FFCB9A;
+
+            color: #2C3531;
+        }
+
+        .back-link {
+            display: block;
+
+            text-align: center;
+
+            margin-top: 20px;
+
+            color: #D1E8E2;
+
+            text-decoration: none;
+        }
+
+        .back-link:hover {
+            color: #FFCB9A;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="login-box">
+
+        <div class="login-title">
+            AVALON SIH
+        </div>
+
+        <p class="text-center mb-4">
+            Access the anomaly detection system
+        </p>
+
+        <form method="POST">
+
+            <div class="mb-3">
+                <input
+                    type="text"
+                    name="username"
+                    class="form-control"
+                    placeholder="Username"
+                    required
+                >
+            </div>
+
+            <div class="mb-4">
+                <input
+                    type="password"
+                    name="password"
+                    class="form-control"
+                    placeholder="Password"
+                    required
+                >
+            </div>
+
+            <button type="submit" class="btn btn-custom">
+                LOGIN
+            </button>
+
+        </form>
+
+        <a href="/" class="back-link">
+            ← Back to Landing Page
+        </a>
+
+    </div>
+
+</body>
+</html>

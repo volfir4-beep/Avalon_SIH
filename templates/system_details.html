@@ -1,0 +1,1421 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>{{ system_id }} - System Diagnostics</title>
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            min-height: 100%;
+        }
+
+        body {
+            min-height: 100vh;
+
+            font-family: Arial, Helvetica, sans-serif;
+
+            color: #D1E8E2;
+
+            background: #061313;
+
+            position: relative;
+
+            overflow-x: hidden;
+        }
+
+
+        /* =========================================
+           ANIMATED BACKGROUND
+        ========================================= */
+
+        body::before {
+
+            content: "";
+
+            position: fixed;
+
+            inset: 0;
+
+            background-image:
+                url("{{ url_for('static', filename='videos/background.gif') }}");
+
+            background-size: cover;
+
+            background-position: center;
+
+            background-repeat: no-repeat;
+
+            z-index: -2;
+        }
+
+
+        /* =========================================
+           DARK OVERLAY
+        ========================================= */
+
+        body::after {
+
+            content: "";
+
+            position: fixed;
+
+            inset: 0;
+
+            background:
+                linear-gradient(
+                    rgba(3, 18, 18, 0.72),
+                    rgba(3, 18, 18, 0.78)
+                );
+
+            z-index: -1;
+
+            pointer-events: none;
+        }
+
+
+        /* =========================================
+           NAVBAR
+        ========================================= */
+
+        .navbar {
+
+            height: 70px;
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: space-between;
+
+            padding: 0 30px;
+
+            background: rgba(3, 20, 20, 0.82);
+
+            border-bottom: 1px solid rgba(65, 220, 220, 0.25);
+
+            backdrop-filter: blur(12px);
+        }
+
+
+        .nav-title {
+
+            font-size: 22px;
+
+            font-weight: bold;
+
+            letter-spacing: 2px;
+
+            color: #D1E8E2;
+        }
+
+
+        .back-button {
+
+            text-decoration: none;
+
+            color: #D1E8E2;
+
+            border: 1px solid #116466;
+
+            padding: 9px 18px;
+
+            border-radius: 5px;
+
+            transition: 0.3s;
+        }
+
+
+        .back-button:hover {
+
+            background: #116466;
+
+            color: white;
+        }
+
+
+        /* =========================================
+           MAIN CONTAINER
+        ========================================= */
+
+        .container {
+
+            width: 92%;
+
+            max-width: 1500px;
+
+            margin: 35px auto 50px;
+        }
+
+
+        /* =========================================
+           SYSTEM HEADER
+        ========================================= */
+
+        .system-header {
+
+            text-align: center;
+
+            margin-bottom: 30px;
+        }
+
+
+        .system-name {
+
+            font-size: 38px;
+
+            font-weight: bold;
+
+            letter-spacing: 4px;
+
+            color: #D1E8E2;
+
+            text-shadow:
+                0 0 12px rgba(50, 220, 220, 0.35);
+        }
+
+
+        .system-subtitle {
+
+            margin-top: 8px;
+
+            font-size: 13px;
+
+            letter-spacing: 3px;
+
+            color: #67caca;
+        }
+
+
+        /* =========================================
+           HEALTH / ANOMALY CARDS
+        ========================================= */
+
+        .metrics {
+
+            display: flex;
+
+            justify-content: center;
+
+            gap: 25px;
+
+            margin-bottom: 35px;
+        }
+
+
+        .metric-card {
+
+            width: 260px;
+
+            padding: 22px;
+
+            text-align: center;
+
+            background: rgba(10, 30, 30, 0.72);
+
+            border: 1px solid rgba(65, 220, 220, 0.35);
+
+            border-radius: 8px;
+
+            backdrop-filter: blur(8px);
+
+            box-shadow:
+                0 0 20px rgba(0, 200, 200, 0.08);
+        }
+
+
+        .metric-label {
+
+            font-size: 13px;
+
+            letter-spacing: 2px;
+
+            color: #82caca;
+
+            margin-bottom: 10px;
+        }
+
+
+        .metric-value {
+
+            font-size: 34px;
+
+            font-weight: bold;
+
+            color: #D1E8E2;
+        }
+
+
+        .metric-value.health {
+
+            color: #63e6be;
+
+            text-shadow:
+                0 0 12px rgba(99, 230, 190, 0.35);
+        }
+
+
+        .metric-value.anomaly {
+
+            color: #ff8b8b;
+
+            text-shadow:
+                0 0 12px rgba(255, 80, 80, 0.3);
+        }
+
+
+        /* =========================================
+           CHART GRID
+        ========================================= */
+
+        .chart-grid {
+
+            display: grid;
+
+            grid-template-columns: 1fr 1fr;
+
+            gap: 22px;
+        }
+
+
+        /* =========================================
+           CHART CARD
+        ========================================= */
+
+        .chart-card {
+
+            height: 380px;
+
+            padding: 20px;
+
+            background: rgba(8, 27, 27, 0.78);
+
+            border: 1px solid rgba(65, 220, 220, 0.28);
+
+            border-radius: 8px;
+
+            backdrop-filter: blur(10px);
+
+            position: relative;
+
+            box-shadow:
+                inset 0 0 30px rgba(0, 180, 180, 0.03),
+                0 0 20px rgba(0, 180, 180, 0.05);
+        }
+
+
+        .chart-card::before {
+
+            content: "";
+
+            position: absolute;
+
+            top: 0;
+
+            left: 0;
+
+            width: 45px;
+
+            height: 2px;
+
+            background: #1acaca;
+        }
+
+
+        .chart-title {
+
+            font-size: 15px;
+
+            letter-spacing: 2px;
+
+            margin-bottom: 15px;
+
+            color: #D1E8E2;
+
+            text-transform: uppercase;
+        }
+
+
+        .chart-wrapper {
+
+            height: 310px;
+
+            position: relative;
+        }
+
+        /* =========================================
+   ANOMALY DETECTION PANEL
+========================================= */
+
+.reason-card {
+    position: relative;
+    width: 100%;
+    margin-top: 20px;
+    padding: 24px 26px;
+
+    background:
+        linear-gradient(
+            135deg,
+            rgba(8, 31, 31, 0.94),
+            rgba(4, 20, 20, 0.90)
+        );
+
+    border: 1px solid rgba(103, 202, 202, 0.28);
+
+    border-radius: 8px;
+
+    overflow: hidden;
+
+    box-shadow:
+        0 0 25px rgba(0, 0, 0, 0.25),
+        inset 0 0 30px rgba(20, 120, 120, 0.04);
+
+    backdrop-filter: blur(12px);
+}
+
+
+/* top glowing line */
+
+.reason-card::before {
+    content: "";
+
+    position: absolute;
+
+    top: 0;
+    left: 0;
+
+    width: 180px;
+    height: 2px;
+
+    background:
+        linear-gradient(
+            90deg,
+            #67caca,
+            transparent
+        );
+
+    box-shadow:
+        0 0 10px rgba(103, 202, 202, 0.5);
+}
+
+
+/* subtle corner */
+
+.reason-card::after {
+    content: "";
+
+    position: absolute;
+
+    top: 0;
+    right: 0;
+
+    width: 70px;
+    height: 70px;
+
+    border-top:
+        1px solid rgba(103, 202, 202, 0.25);
+
+    border-right:
+        1px solid rgba(103, 202, 202, 0.25);
+
+    opacity: 0.7;
+}
+
+
+/* =========================================
+   HEADER
+========================================= */
+
+.reason-header {
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    margin-bottom: 20px;
+
+    padding-bottom: 15px;
+
+    border-bottom:
+        1px solid
+        rgba(103, 202, 202, 0.12);
+}
+
+
+.reason-title {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 12px;
+
+    font-size: 12px;
+
+    font-weight: bold;
+
+    letter-spacing: 2px;
+
+    color: #D1E8E2;
+}
+
+
+.reason-title-icon {
+
+    width: 30px;
+
+    height: 30px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    border-radius: 5px;
+
+    color: #ff8585;
+
+    background:
+        rgba(255, 85, 85, 0.08);
+
+    border:
+        1px solid
+        rgba(255, 85, 85, 0.25);
+
+    box-shadow:
+        0 0 12px
+        rgba(255, 85, 85, 0.08);
+}
+
+
+/* =========================================
+   STATUS
+========================================= */
+
+.reason-status {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 8px;
+
+    font-size: 9px;
+
+    letter-spacing: 1.5px;
+
+    color: #ff8585;
+
+    padding:
+        6px 10px;
+
+    border:
+        1px solid
+        rgba(255, 85, 85, 0.25);
+
+    border-radius: 4px;
+
+    background:
+        rgba(255, 85, 85, 0.06);
+}
+
+
+.status-dot {
+
+    width: 6px;
+
+    height: 6px;
+
+    border-radius: 50%;
+
+    background: #ff6666;
+
+    box-shadow:
+        0 0 8px
+        rgba(255, 80, 80, 0.8);
+
+    animation:
+        pulse-status 1.5s infinite;
+}
+
+
+@keyframes pulse-status {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.35;
+    }
+
+}
+
+
+/* =========================================
+   ANALYSIS CONTENT
+========================================= */
+
+.reason-content {
+
+    display: grid;
+
+    grid-template-columns:
+        190px 1fr;
+
+    gap: 20px;
+}
+
+
+/* =========================================
+   CLASSIFICATION
+========================================= */
+
+.reason-classification {
+
+    padding: 18px;
+
+    border:
+        1px solid
+        rgba(103, 202, 202, 0.15);
+
+    border-radius: 5px;
+
+    background:
+        rgba(0, 0, 0, 0.18);
+}
+
+
+.classification-label {
+
+    font-size: 8px;
+
+    letter-spacing: 2px;
+
+    color:
+        rgba(209, 232, 226, 0.45);
+
+    margin-bottom: 10px;
+}
+
+
+.classification-value {
+
+    font-size: 15px;
+
+    font-weight: bold;
+
+    color: #ff8585;
+
+    letter-spacing: 1px;
+
+    margin-bottom: 14px;
+}
+
+
+.classification-line {
+
+    height: 2px;
+
+    width: 100%;
+
+    background:
+        linear-gradient(
+            90deg,
+            #ff8585,
+            transparent
+        );
+
+    margin-bottom: 14px;
+}
+
+
+.classification-info {
+
+    font-size: 9px;
+
+    line-height: 1.6;
+
+    color:
+        rgba(209, 232, 226, 0.45);
+}
+
+
+/* =========================================
+   EXPLANATION
+========================================= */
+
+.reason-explanation {
+
+    position: relative;
+
+    padding: 18px 20px;
+
+    background:
+        rgba(4, 25, 25, 0.7);
+
+    border:
+        1px solid
+        rgba(103, 202, 202, 0.13);
+
+    border-radius: 5px;
+}
+
+
+.explanation-label {
+
+    font-size: 8px;
+
+    letter-spacing: 2px;
+
+    color: #67caca;
+
+    margin-bottom: 10px;
+}
+
+
+.reason-text {
+
+    font-size: 12px;
+
+    line-height: 1.8;
+
+    color:
+        rgba(209, 232, 226, 0.78);
+
+    margin: 0;
+}
+
+
+/* =========================================
+   RESPONSIVE
+========================================= */
+
+@media (max-width: 700px) {
+
+    .reason-content {
+
+        grid-template-columns: 1fr;
+
+    }
+
+    .reason-header {
+
+        align-items: flex-start;
+
+        gap: 15px;
+
+        flex-direction: column;
+
+    }
+
+}
+
+
+        /* =========================================
+           FOOTER
+        ========================================= */
+
+        .footer {
+
+            margin-top: 40px;
+
+            padding: 20px;
+
+            text-align: center;
+
+            border-top: 1px solid rgba(65, 220, 220, 0.2);
+
+            color: rgba(209, 232, 226, 0.55);
+
+            font-size: 12px;
+
+            letter-spacing: 1px;
+        }
+
+
+        /* =========================================
+           MOBILE
+        ========================================= */
+
+        @media (max-width: 900px) {
+
+            .chart-grid {
+
+                grid-template-columns: 1fr;
+            }
+
+            .metrics {
+
+                flex-direction: column;
+
+                align-items: center;
+            }
+
+            .metric-card {
+
+                width: 90%;
+            }
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+    <!-- =========================================
+         NAVBAR
+    ========================================== -->
+
+    <nav class="navbar">
+
+        <div class="nav-title">
+            AVALON SIH
+        </div>
+
+        <a href="/dashboard" class="back-button">
+            ← DASHBOARD
+        </a>
+
+    </nav>
+
+
+    <!-- =========================================
+         MAIN
+    ========================================== -->
+
+    <main class="container">
+
+
+        <!-- SYSTEM NAME -->
+
+        <section class="system-header">
+
+            <div class="system-name">
+                {{ system_id }}
+            </div>
+
+            <div class="system-subtitle">
+                SYSTEM DIAGNOSTICS / LIVE MONITORING
+            </div>
+
+        </section>
+
+
+        <!-- =====================================
+             HEALTH + ANOMALY
+        ====================================== -->
+
+        <section class="metrics">
+
+            <div class="metric-card">
+
+                <div class="metric-label">
+                    HEALTH SCORE
+                </div>
+
+                <div class="metric-value health">
+                    {{ health_score }}%
+                </div>
+
+            </div>
+
+
+            <div class="metric-card">
+
+                <div class="metric-label">
+                    ANOMALY DETECTED
+                </div>
+
+                <div class="metric-value anomaly">
+                    {{ anomaly_percentage }}%
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =====================================
+             FOUR QUADRANTS
+        ====================================== -->
+
+        <section class="chart-grid">
+
+
+            <!-- TEMPERATURE -->
+
+            <div class="chart-card">
+
+                <div class="chart-title">
+                    TEMPERATURE / TIME
+                </div>
+
+                <div class="chart-wrapper">
+
+                    <canvas id="temperatureChart"></canvas>
+
+                </div>
+
+            </div>
+
+
+            <!-- PRESSURE -->
+
+            <div class="chart-card">
+
+                <div class="chart-title">
+                    PRESSURE / TIME
+                </div>
+
+                <div class="chart-wrapper">
+
+                    <canvas id="pressureChart"></canvas>
+
+                </div>
+
+            </div>
+
+
+            <!-- HUMIDITY -->
+
+            <div class="chart-card">
+
+                <div class="chart-title">
+                    HUMIDITY / TIME
+                </div>
+
+                <div class="chart-wrapper">
+
+                    <canvas id="humidityChart"></canvas>
+
+                </div>
+
+            </div>
+
+
+            <!-- ANOMALY PIE CHART -->
+
+            <div class="chart-card">
+
+                <div class="chart-title">
+                    ANOMALY PROFILE
+                </div>
+
+                <div class="chart-wrapper">
+
+                    <canvas id="anomalyChart"></canvas>
+
+                </div>
+
+            </div>
+
+
+        </section>
+
+       <!-- =================================================
+     ANOMALY DETECTION ANALYSIS
+================================================== -->
+
+<section class="reason-card">
+
+    <div class="reason-header">
+
+        <div class="reason-title">
+
+            <div class="reason-title-icon">
+
+                <i class="fas fa-triangle-exclamation"></i>
+
+            </div>
+
+            ANOMALY DETECTION ANALYSIS
+
+        </div>
+
+
+        <div class="reason-status">
+
+            <span class="status-dot"></span>
+
+            ANOMALY DETECTED
+
+        </div>
+
+    </div>
+
+
+    <div class="reason-content">
+
+
+        <!-- CLASSIFICATION -->
+
+        <div class="reason-classification">
+
+            <div class="classification-label">
+                PRIMARY CLASSIFICATION
+            </div>
+
+            <div class="classification-value">
+                MULTIVARIATE
+            </div>
+
+            <div class="classification-line"></div>
+
+            <div class="classification-info">
+
+                Multiple sensor values are
+                deviating from their expected
+                relationship.
+
+            </div>
+
+        </div>
+
+
+        <!-- EXPLANATION -->
+
+        <div class="reason-explanation">
+
+            <div class="explanation-label">
+                DETECTION REASON
+            </div>
+
+            <p class="reason-text">
+
+                {{ anomaly_reason }}
+
+            </p>
+
+        </div>
+
+
+    </div>
+
+</section>
+
+
+        <!-- =====================================
+             FOOTER
+        ====================================== -->
+
+        <footer class="footer">
+
+            AVALON SIH 2026
+
+            <br>
+
+            Built by IIT Dharwad Students
+
+        </footer>
+
+
+    </main>
+
+
+    <!-- =========================================
+         CHART JAVASCRIPT
+    ========================================== -->
+
+    <script>
+
+        /*
+        ==================================================
+        SAMPLE DATA
+        ==================================================
+
+        Replace these later with data coming from Flask /
+        your database / API.
+        */
+
+
+        const timeLabels = [
+            "10:00",
+            "10:05",
+            "10:10",
+            "10:15",
+            "10:20",
+            "10:25",
+            "10:30",
+            "10:35",
+            "10:40",
+            "10:45"
+        ];
+
+
+        const temperatureData = [
+            27.2,
+            27.5,
+            27.8,
+            28.1,
+            28.7,
+            29.4,
+            29.0,
+            28.6,
+            28.2,
+            27.9
+        ];
+
+
+        const pressureData = [
+            1009,
+            1010,
+            1008,
+            1011,
+            1012,
+            1011,
+            1010,
+            1009,
+            1011,
+            1012
+        ];
+
+
+        const humidityData = [
+            58,
+            59,
+            60,
+            61,
+            63,
+            65,
+            64,
+            62,
+            61,
+            60
+        ];
+
+
+        /*
+        ==================================================
+        COMMON CHART OPTIONS
+        ==================================================
+        */
+
+        const lineChartOptions = {
+
+            responsive: true,
+
+            maintainAspectRatio: false,
+
+            interaction: {
+                intersect: false,
+                mode: "index"
+            },
+
+            plugins: {
+
+                legend: {
+                    display: false
+                }
+
+            },
+
+            scales: {
+
+                x: {
+
+                    ticks: {
+                        color: "#7fbebe"
+                    },
+
+                    grid: {
+                        color: "rgba(100, 200, 200, 0.08)"
+                    }
+
+                },
+
+                y: {
+
+                    ticks: {
+                        color: "#7fbebe"
+                    },
+
+                    grid: {
+                        color: "rgba(100, 200, 200, 0.08)"
+                    }
+
+                }
+
+            }
+
+        };
+
+
+        /*
+        ==================================================
+        TEMPERATURE
+        ==================================================
+        */
+
+        new Chart(
+            document.getElementById("temperatureChart"),
+            {
+
+                type: "line",
+
+                data: {
+
+                    labels: timeLabels,
+
+                    datasets: [
+
+                        {
+
+                            label: "Temperature",
+
+                            data: temperatureData,
+
+                            borderColor: "#55d6d6",
+
+                            backgroundColor:
+                                "rgba(85, 214, 214, 0.12)",
+
+                            borderWidth: 2,
+
+                            tension: 0.35,
+
+                            fill: true,
+
+                            pointRadius: 2,
+
+                            pointHoverRadius: 5
+
+                        }
+
+                    ]
+
+                },
+
+                options: lineChartOptions
+
+            }
+        );
+
+
+        /*
+        ==================================================
+        PRESSURE
+        ==================================================
+        */
+
+        new Chart(
+            document.getElementById("pressureChart"),
+            {
+
+                type: "line",
+
+                data: {
+
+                    labels: timeLabels,
+
+                    datasets: [
+
+                        {
+
+                            label: "Pressure",
+
+                            data: pressureData,
+
+                            borderColor: "#d8a85f",
+
+                            backgroundColor:
+                                "rgba(216, 168, 95, 0.10)",
+
+                            borderWidth: 2,
+
+                            tension: 0.35,
+
+                            fill: true,
+
+                            pointRadius: 2,
+
+                            pointHoverRadius: 5
+
+                        }
+
+                    ]
+
+                },
+
+                options: lineChartOptions
+
+            }
+        );
+
+
+        /*
+        ==================================================
+        HUMIDITY
+        ==================================================
+        */
+
+        new Chart(
+            document.getElementById("humidityChart"),
+            {
+
+                type: "line",
+
+                data: {
+
+                    labels: timeLabels,
+
+                    datasets: [
+
+                        {
+
+                            label: "Humidity",
+
+                            data: humidityData,
+
+                            borderColor: "#6ea8ff",
+
+                            backgroundColor:
+                                "rgba(110, 168, 255, 0.10)",
+
+                            borderWidth: 2,
+
+                            tension: 0.35,
+
+                            fill: true,
+
+                            pointRadius: 2,
+
+                            pointHoverRadius: 5
+
+                        }
+
+                    ]
+
+                },
+
+                options: lineChartOptions
+
+            }
+        );
+
+
+        /*
+        ==================================================
+        ANOMALY PIE CHART
+        ==================================================
+        */
+
+        new Chart(
+            document.getElementById("anomalyChart"),
+            {
+
+                type: "doughnut",
+
+                data: {
+
+                    labels: [
+
+                        "Freeze",
+
+                        "Spike",
+
+                        "Multivariate Inconsistency",
+
+                        "Noise Burst",
+
+                        "Drift"
+
+                    ],
+
+                    datasets: [
+
+                        {
+
+                            data: [
+
+                                12,
+                                24,
+                                31,
+                                15,
+                                18
+
+                            ],
+
+                            backgroundColor: [
+
+                                "#55d6d6",
+                                "#ff7b7b",
+                                "#d8a85f",
+                                "#8d9eff",
+                                "#72d6a5"
+
+                            ],
+
+                            borderColor:
+                                "rgba(5, 20, 20, 0.8)",
+
+                            borderWidth: 2
+
+                        }
+
+                    ]
+
+                },
+
+                options: {
+
+                    responsive: true,
+
+                    maintainAspectRatio: false,
+
+                    cutout: "55%",
+
+                    plugins: {
+
+                        legend: {
+
+                            position: "bottom",
+
+                            labels: {
+
+                                color: "#D1E8E2",
+
+                                padding: 12,
+
+                                font: {
+                                    size: 11
+                                }
+
+                            }
+
+                        }
+
+                    }
+
+                }
+
+            }
+        );
+
+    </script>
+
+
+</body>
+
+</html>
