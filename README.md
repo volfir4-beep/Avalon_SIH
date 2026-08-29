@@ -1,4 +1,4 @@
-# SkyGuard AI
+# AVALON
 ### Intelligent Real-Time Anomaly Detection System for Temperature, Pressure & Humidity Sensors in Automatic Weather Stations (AWS)
 
 > Detects sensor faults, spikes, frozen values, drift, and communication errors in AWS data streams — in real time, with explainable AI and confidence scoring.
