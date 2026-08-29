@@ -42,15 +42,13 @@
 </head>
 <body>
     <div class="text-center container">
-        <img src="Gemini_Generated_Image_3n3ke93n3ke93n3k.png" alt="Avalon 2026 Logo" class="brand-logo">
+        <!-- Jinja2 syntax used here to correctly route the image from the Flask static folder -->
+        <img src="{{ url_for('static', filename='Gemini_Generated_Image_3n3ke93n3ke93n3k.png') }}" alt="Avalon 2026 Logo" class="brand-logo">
         <h1 class="mb-4">Welcome to the Future</h1>
         <p class="mb-5">Experience the next generation of connectivity.</p>
         
-        <!-- This button triggers the routing script -->
-        <button id="loginRouteBtn" class="btn btn-custom btn-lg">DISCOVER (LOGIN)</button>
+        <!-- Button converted to an anchor tag pointing to the Flask /login route -->
+        <a href="/login" class="btn btn-custom btn-lg text-decoration-none">DISCOVER (LOGIN)</a>
     </div>
-
-    <!-- Link to your routing file -->
-    <script src="router.js"></script>
 </body>
 </html>
