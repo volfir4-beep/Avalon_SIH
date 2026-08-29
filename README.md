@@ -30,7 +30,6 @@ No single model catches every fault type, so four detectors run in parallel on e
 | Model | Catches | Output |
 |---|---|---|
 | **Harmonic Regression** | Deviation from expected daily/seasonal baseline | Residual score |
-| **LSTM Autoencoder** | Temporal pattern breaks — drift, frozen values, noise bursts | Reconstruction error |
 | **Isolation Forest** | Unusual multivariate combinations across T/P/RH | Isolation score |
 | **Spatial Consistency Check** | Single-station faults invisible when compared to neighbors | Spatial deviation score |
 
@@ -55,9 +54,9 @@ Converts the diagnosis into something actionable:
 
 ---
 
-## 3. Dataset — `synthetic_aws_data.csv`
+## 3. Dataset — `avalon_dataset.csv`
 
-We use a synthetic AWS dataset that mirrors real deployment characteristics: 5 stations, 10-minute sampling cadence, over a 30-day period, with realistic injected anomalies for training/evaluating the detectors.
+We use an INSAT-3DR AWS dataset that mirrors real deployment characteristics: 5 stations, 10-minute sampling cadence, over a 30-day period, with realistic injected anomalies for training/evaluating the detectors.
 
 | Property | Value |
 |---|---|
@@ -99,5 +98,5 @@ The `is_anomaly` and `anomaly_type` columns serve as **ground truth labels** for
 ---
 
 ## 5. Files in This Repo
-https://1drv.ms/x/c/50d6bfde204a44c9/IQCwKXL2iiysQ4QAnfcKBpczAZuIc3amN0a-HZ7euFqFwKU?e=l0ssWP&nav=MTVfezk3RENDMDFCLTYyMUMtNEMyRC1CMEU4LTAzNzJGQ0U0MzhGMn0
+https://1drv.ms/x/c/50d6bfde204a44c9/IQAd9b1emgkVQ5RYsKTEQT-IATFFAwNKXyTVeRhmHgSOFd8?e=Pzgudf&nav=MTVfe0ZEMzA2ODlGLTY3QjgtNDFDQS1CRUJELTA0NTE2NDlDNTMwRn0
 
